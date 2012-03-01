@@ -1,0 +1,18 @@
+Author: William C Grisaitis
+Date: Feb. 20, 2012
+
+Intro
+	This code is for the problem sets in Physics 260: "Computational Physics" taught by Steffen Bass, Ph.D., at Duke University.
+
+Table of Contents
+ 	Homework 3: Model of the trajectory of a golf ball. 
+
+Instructions
+	To produce the results for any particular problem set (say, Homework N), run `homeworkN_main.py` in an interpreter or in Eclipse with the rest of the files together.
+
+Requisite [not built-in] packages
+	numpy
+	matplotlib
+	scipy
+	scitools
+

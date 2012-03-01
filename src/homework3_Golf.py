@@ -7,7 +7,7 @@ Created on Feb 7, 2012
 from numpy import pi, sin, cos
 from Forces import Force_Gravity, Ball_Drag, Magnus_Effect
 from Vector_3D import V3
-from ODE_Solver import EulerSolver, AboveGround
+from ODE_Solver_v1 import EulerSolver, AboveGround
 from matplotlib.pyplot import plot, text, title, xlabel, ylabel, show, figure, \
     xlim, ylim, figtext
 

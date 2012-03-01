@@ -15,7 +15,7 @@ import math
 
 # Follow the "Don't Repeat Yourself" principle. Put the common code
 # into the base class.
-class OdeSolver( object ):
+class ODESolver_v1( object ):
     """
     Base class for particle motion ODE solving schemes. The subclasses
     must implement the following function:
@@ -181,7 +181,7 @@ class OdeSolver( object ):
 #
 ###########################################################################
 
-class EulerSolver( OdeSolver ):
+class EulerSolver( ODESolver_v1 ):
     """
     Implements the Euler ODE solving scheme. Construct the solver with
     EulerSolver(F, m) where F is the force model and m is the particle mass.
@@ -200,7 +200,7 @@ class EulerSolver( OdeSolver ):
         return dx, dv
 
 
-class EulerCromer( OdeSolver ):
+class EulerCromer( ODESolver_v1 ):
     """
     Implements the Euler-Cromer ODE solving scheme. Construct the solver with
     EulerCromer(F, m) where F is the force model and m is the particle mass.
@@ -221,7 +221,7 @@ class EulerCromer( OdeSolver ):
         return dx, dv
 
 
-class RK4( OdeSolver ):
+class RK4( ODESolver_v1 ):
     """
     Implements the 4th order Runge-Kutta ODE solving scheme. Construct the
     solver with RK4(F, m) where F is the force model and m is the particle
@@ -249,7 +249,7 @@ class RK4( OdeSolver ):
         return dx, dv
 
 
-class RK6( OdeSolver ):
+class RK6( ODESolver_v1 ):
     """
     Implements the 6th order Runge-Kutta ODE solving scheme. Construct the
     solver with RK6(F, m) where F is the force model and m is the particle

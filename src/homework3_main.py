@@ -33,9 +33,8 @@ the following cases:
             S0*omega/m = 0.25 s**-1 
         for a typical case. [3 points]
 '''
-from homework3_Golf import Golf
 
-DEBUG = False
+from homework3_Golf import Golf
 
 if __name__ == '__main__':
     file_directory = "/home/res/Documents/duke/2012S/PHY260/homeworks/homework3/"
