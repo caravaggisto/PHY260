@@ -13,9 +13,11 @@ This is a test I wonder if this wrapper things really works and if obama will ge
 
 from homework4_Pendulum import Pendulum    
 import numpy
-from numpy import log10, pi, linspace, cos, sin
+from numpy import log2, pi, linspace, cos, sin
 import ODE_Solver_v3
-from matplotlib.pyplot import figure, plot, gcf, show
+from matplotlib.pyplot import figure, plot, gcf, show, close, legend, figlegend, \
+    gca
+from Grapher_v1 import Grapher
 
 #file_directory = "/home/res/Documents/duke/2012S/PHY260/homeworks/homework4/"
 #file_name_base = "PHY260_Grisaitis_homework3_"
@@ -89,28 +91,47 @@ For 10 driving frequencies, including resonance:
 #TODO: after debugging, decrease the time step for better resolution
 
 #defaults:
-( U0, __dummy__, alpha_D, length, gamma, linear ) = \
-( [0.2, 0], 0.667, 0.5, 9.8, 0.25, True )
-
-#TODO: uncomment the following line when stuff works...
-#driving_frequencies = numpy.logspace( log10( 0.666 ) - 3, log10( 0.666 ) + 6, 10 )
-# = array([0.000666,..., 0.666,..., 666000])
-#driving_frequencies = numpy.logspace( -1, 1, 3 )
+U0 = [0.2, 0]
 driving_frequencies = [0.667]
-# = array([ 0.1, 1, 10 ])
+#driving_frequencies = numpy.logspace( log2( 0.666 ) - 3, log2( 0.666 ) + 6, 10, base = 2 )
+# = array([0.000666,..., 0.666,..., 666000])
+alpha_D = 1.2
+length = 9.8
+gamma = 0.25
+linear = False
 
+# construct pendulum objects
 pendula = []
 for omega_D in driving_frequencies:
-    for U0 in [[0.2, 0], [-3.14, 0]]:
-        pendula.append( Pendulum( U0, omega_D, alpha_D, length, gamma, linear ) )
+    pendula.append( Pendulum( omega_D, alpha_D, length, gamma, linear ) )
 
 nperiods = 10     # no of oscillation periods
 T = 2 * pi * nperiods    # update this to work with omega_D, and eventually many values of omega_D to be graphed together.
 #TODO: remove the following after debugging
-T = 60
+T = 100
 
-for method_class in ODE_Solver_v3.ForwardEuler, ODE_Solver_v3.RungeKutta2:
-    npoints_per_period = 200
+for method_class in ODE_Solver_v3.EulerCromer, ODE_Solver_v3.RungeKutta2:
+    npoints_per_period = 500
+    n = npoints_per_period * nperiods
+    t_points = linspace( 0, T, n + 1 )      # should I make this a numpy array?
+    u0_graph = Grapher( 'Theta(t)', '', 't (seconds)', 'theta (radians)', 'bottom right' )
+    #title, subtitle, x_label, y_label, legend_loc 
+    u1_graph = Grapher( 'Omega(t)', '', 't (seconds)', 'omega (radians per second)', 'bottom right' )
+    for f in pendula:
+        method = method_class( f )
+        method.set_initial_condition( U0 )
+        #TODO: how do I want to store results for comparing results by omega_D?
+        u, t = method.solve( t_points )
+        # u(t) is a 2 x n array with [u0,u1] for all t's
+        u0_values = u[:, 0]  # get the u0 values from u for plotting
+        u0_graph.add_data( t, u0_values, str( f.omega_D ) )
+        u1_values = u[:, 1]
+        u0_graph.add_data( t, u1_values, str( f.omega_D ) )
+#    u0_graph.show_figure()
+    u1_graph.show_figure()
+
+for method_class, color in [( ODE_Solver_v3.RungeKutta2, 'r-' ), ( ODE_Solver_v3.EulerCromer, 'b-' )]:
+    npoints_per_period = 500
     n = npoints_per_period * nperiods
     t_points = linspace( 0, T, n + 1 )      # should I make this a numpy array?
 #    figure( 'theta' )       # make figure for theta(t)
@@ -120,34 +141,36 @@ for method_class in ODE_Solver_v3.ForwardEuler, ODE_Solver_v3.RungeKutta2:
     #plot models for each driving frequency
     for f in pendula:
         method = method_class( f )
-        method.set_initial_condition( f.U0 )
+        method.set_initial_condition( U0 )
         #TODO: how do I want to store results for comparing results by omega_D?
         u, t = method.solve( t_points )
         # u(t) is a 2 x n array with [u0,u1] for all t's
         u0_values = u[:, 0]  # get the u0 values from u for plotting
         u1_values = u[:, 1]
+        #u0_graph.add_data(t, u, legend_label)
+        #u1_graph.add_data(t, u, legend_label)
         figure( fig_u0.number )
-        plot( t, u0_values, 'r-' )
+        plot( t, u0_values, color )
         figure( fig_u1.number )
-        plot( t, u1_values, 'r-' )
+        plot( t, u1_values, color )
     figure( fig_u0.number )
-    u0_exact = cos( t )
-    # plot cos(t) as blue:
-#    plot( t, u0_exact, 'b-' )
+    fig_u0.get_axes()[0]
+    legend()
     figure( fig_u1.number )
-    u1_exact = -sin( t )
-#    plot( t, u1_exact, 'b-' )
     alg = method_class.__name__  # (class) name of algorithm
 #    plot( t, u0_values, 'r-',
 #         t, u0_exact, 'b-',
 ##         legend = ( 'numerical', 'exact' ),
 ##         title = 'Oscillating system; position - %s' % alg )
 # )
-    #TODO: edit title, legend, notes for each figure.
 #         legend = ( 'numerical', 'exact' ),
 #         title = 'Pendulum; angle - %s' % alg )
     for fig in fig_u0, fig_u1:
+        fig
         fig.savefig( dir_to_save + name_base + str( fig.number ) + '%s.' % alg + file_type )
+print gcf().__hash__
+show()
+
 
 ''' Part C 
 For omega = resonance frequency:
@@ -158,6 +181,12 @@ For omega = resonance frequency:
         * total
         *** Note: over 10 periods (= 10*2pi/omega)
 '''
+
+
+
+
+
+
 ''' Part D 
 For omega = resonance frequency:
     Plot 1: functions of time
@@ -175,38 +204,3 @@ For omega = 0.666 s-1:
             Plot the results and estimate the Lyapunov exponent of the system.
 '''
 
-
-
-
-if __name__ == '__main__':
-    file_directory = "/home/res/Documents/duke/2012S/PHY260/homeworks/homework3/"
-#    TODO: edit the following line, implement differently when processing data for different parts of the assignment.
-    file_name_base = "PHY260_Grisaitis_homework3_"
-    file_type_extensions = ['png']
-    
-    # Parameters to examine:
-    initial_angles_degrees = ( 9, 15, 30, 45 )
-    initial_speed = 70
-    dt = 0.01
-    
-    # This array contains the parameters specific to each part of the problem.
-    question_parameters = [ \
-        ['A', 0.0, False, False, 'Ideal'], \
-        ['B', 0.5, False, False, 'With air resistance'], \
-        ['C', 0.5, True, False, 'With air resistance and dimples'], \
-        ['D', 0.5, True, True, 'With air resistance, dimples, and spin']]
-    
-    for ( part, C, dimpled, spin, info ) in question_parameters:
-        # initialize a model object for each part of the problem
-        golf_ball = Golf( initial_angles_degrees, initial_speed, C, dimpled, spin )
-        golf_ball.solve_with_Euler( dt )
-        file_name_base = "PHY260_Grisaitis_homework3_" + part
-        # plot the model and save results to file
-        golf_ball.plot_and_save_models( \
-            file_directory = file_directory, \
-            file_name_base = file_name_base, \
-            file_types = file_type_extensions, \
-            info_text = ( ( 'Part %s:' % part ) + info ) \
-            )
-        
-    

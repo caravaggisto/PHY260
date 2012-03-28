@@ -9,7 +9,7 @@ Assignment: Oscillatory Motion and Chaos
 
 import numpy as np
 
-class ODE_Solver_v3:
+class ODE_Solver:
     """
     Superclass for numerical methods solving scalar and vector ODEs
     
@@ -69,7 +69,7 @@ class ODE_Solver_v3:
             # if not `terminate` not provided, a function that always returns False is used.
             # -> don't stop simulation prematurely for any reason.
         if isinstance( time_points, ( float, int ) ):
-            raise TypeError( 'ODE_Solver_v3.solve: time_points is not a sequence' )
+            raise TypeError( 'ODE_Solver.solve: time_points is not a sequence' )
             # make sure the time_points input is an array
         self.t = np.asarray( time_points )
         n = self.t.size
@@ -103,7 +103,7 @@ class ODE_Solver_v3:
             tmax = self.t[n - 1]
             if t < tmin or t > tmax:
                 raise ValueError, \
-                      "Requested time is outside the simulated interval"
+                  "Requested time is outside the simulated interval"
             for k in range( 0, n - 1 ):
                 if t > self.t[k]:
                     break
@@ -117,7 +117,9 @@ class ODE_Solver_v3:
             # = a normalized, weighted sum (equivalently, an average) of u[k-1] and u[k]
             return u_interpolated
     
-    def steady_state_time( self, period ):
+    
+    ''' functions for models of sinusoidally driven ODEs '''
+    def get_steady_state_time( self, period ):
         '''
         find the time at which the solution u[t] approaches a steady state.
         How to find? Find t such that:
@@ -128,15 +130,58 @@ class ODE_Solver_v3:
         '''
         #TODO: implement, if necessary :)
         raise NotImplementedError
+    
+    def sinusoidal( self ):
+        #TODO: implement, if necessary. 
+        # The idea of this method is just to return True if the data 
+        # shows a sinusoidal steady state solution. How to quantify
+        # this, not sure. maybe by measuring local extrema in data, 
+        # seeing if their magnitude and spacing converge as the time
+        # series continues.
+        return True
+    
+    def get_amplitude( self ):
+        # return the last local maximum in u(t), assuming sinusoidal data.
+        #TODO: find function, maybe in numpy, for local maxima.
+        # then, iterate backwards through u(t), starting at end
+        if self.sinusoidal():
+            k = 1
+            while self.u[-k - 1] > self.u[-k]:
+                # while downward sloping, working from end of data...
+                # increase k.
+                k += 1
+        return self.u[-k]
+    
+    def get_phase_shift( self ):
+        # External data needed:
+        #    driving frequency
+        #    phase of driving freq
+        # Internal data needed:
+        #    if data is sinusoidal,
+        #        times at which peaks happen
+        #        -> phase of data
+        # return (phase of data) - (phase of driving)
+        raise NotImplementedError
+    
+    def get_FWHM( self ):
+        # return time gap between half-maxima of steady state part.
+        if self.sinusoidal():
+            # if data is sinusoidal,
+            amplitude = self.get_amplitude()
+            half_maximum = amplitude * 0.5
+            # extrapolate time points at which this value occurs in the data
+        raise NotImplementedError
+    
+    
 
-class ForwardEuler( ODE_Solver_v3 ):
+class ForwardEuler( ODE_Solver ):
     def advance( self ):
         u, f, k, t = self.u, self.f, self.k, self.t
         dt = t[k + 1] - t[k]
         unew = u[k] + dt * f( u[k], t[k] )
         return unew
 
-class EulerCromer( ODE_Solver_v3 ):
+class EulerCromer( ODE_Solver ):
     def advance( self ):
         u, f, k, t = self.u, self.f, self.k, self.t
         unew = u[k].copy()
@@ -147,7 +192,7 @@ class EulerCromer( ODE_Solver_v3 ):
         unew[0] = u[k][0] + dt * f( ucromer, t[k] )[0]
         return unew
 
-class RungeKutta2( ODE_Solver_v3 ):
+class RungeKutta2( ODE_Solver ):
     def advance( self ):
         u, f, k, t = self.u, self.f, self.k, self.t
         dt = t[k + 1] - t[k]
@@ -157,7 +202,7 @@ class RungeKutta2( ODE_Solver_v3 ):
         unew = u[k] + K2
         return unew
 
-class RungeKutta4( ODE_Solver_v3 ):
+class RungeKutta4( ODE_Solver ):
     def advance( self ):
         u, f, k, t = self.u, self.f, self.k, self.t
         dt = t[k + 1] - t[k]
@@ -176,10 +221,10 @@ try:
 except ImportError:
     pass
 
-class BackwardEuler( ODE_Solver_v3 ):
+class BackwardEuler( ODE_Solver ):
     """Backward Euler solver for scalar ODEs."""
     def __init__( self, f ):
-        ODE_Solver_v3.__init__( self, f )
+        ODE_Solver.__init__( self, f )
         # Make a sample call to check that f is a scalar function:
         try:
             u = np.array( [1] ); t = 1
@@ -187,10 +232,6 @@ class BackwardEuler( ODE_Solver_v3 ):
         except IndexError:  # index out of bounds for u
             raise ValueError( 'f(u,t) must return float/int' )
 
-    # Alternative implementation of F:
-    #def F(self, w):
-    #    return w - self.dt*self.f(w, self.t[-1]) - self.u[self.k]
-    
     def advance( self ):
         u, f, k, t = self.u, self.f, self.k, self.t
         dt = t[k + 1] - t[k]
