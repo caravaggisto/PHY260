@@ -119,37 +119,37 @@ list_of_arrays_of_points = []
 # Part A: initialize stuff
 ########
 constraints = ( 0, 0, None )
-x_values = axis_points.copy()
-x_values.fill( 0 )
+random_sample = axis_points.copy()
+random_sample.fill( 0 )
 y_values = axis_points.copy()
 y_values.fill( 0 )
 z_values = axis_points
 N = len( z_values ) # = number of points approximated
-part_A_points = np.column_stack( ( x_values, y_values, z_values ) )
+part_A_points = np.column_stack( ( random_sample, y_values, z_values ) )
 list_of_arrays_of_points.append( part_A_points )
 
 ######## 
 # Part B: initialize stuff
 ########
 constraints = ( None, 0, 1 )
-x_values = axis_points
+random_sample = axis_points
 y_values = axis_points.copy()
 y_values.fill( 0 )
 z_values = axis_points.copy()
 z_values.fill( 1 )
-part_B_points = np.column_stack( ( x_values, y_values, z_values ) )
+part_B_points = np.column_stack( ( random_sample, y_values, z_values ) )
 list_of_arrays_of_points.append( part_B_points )
 
 ######## 
 # Part C: initialize
 ########
 constraints = ( 0.5, 0, None )
-x_values = axis_points.copy()
-x_values.fill( 0.5 )
+random_sample = axis_points.copy()
+random_sample.fill( 0.5 )
 y_values = axis_points.copy()
 y_values.fill( 0 )
 z_values = axis_points
-part_C_points = np.column_stack( ( x_values, y_values, z_values ) )
+part_C_points = np.column_stack( ( random_sample, y_values, z_values ) )
 list_of_arrays_of_points.append( part_C_points )
 
 ''' TODO: Optimization. I could combine this entire last chunk of 
