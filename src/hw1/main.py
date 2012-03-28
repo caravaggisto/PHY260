@@ -1,0 +1,101 @@
+'''
+PHY260 | homework 0
+due: Jan 18, 2011
+
+
+
+@author: William  C Grisaitis
+'''
+
+import numpy
+import matplotlib.pyplot
+
+def Number_1_part_a():
+    '''
+    a) write a computer code to print the text Hello World onto your com-
+    puter screen [2 point]
+    '''
+    return "Hello World"
+
+def Number_1_part_b( start, end, increment, file_directory, file_name ):
+    '''
+    b) write a 2nd computer code that creates an ASCII file with a table.
+    * The first column of the table should contain floating point numbers
+    from -10.0 to 10.0 in steps of 0.05.
+    * The second column should contain the value of the function sin(x), 
+    with x being the number in the 1st column. 
+    * The 3rd column should contain the value of the function sin(x)/x, 
+    again with x being the number in the first column.
+    '''
+    # make first column of values
+    ### Note: arange() omits the end value. To include it, we make `end` 
+    ### be the desired end plus an increment
+    first_column = numpy.arange( start, end + increment, increment )
+    # make empty array for output
+    table_array = numpy.zeros( [3, first_column.size] )
+    # populate each column
+    table_array[0] = first_column.view()
+    table_array[1] = numpy.sin( table_array[0] )
+    table_array[2] = numpy.divide( table_array[1], table_array[0] )
+    # save the array to file
+    file_path = file_directory + file_name
+    numpy.savetxt( file_path, table_array.transpose(), fmt = '%10.5f', delimiter = '' )    
+    # print the contents of the file
+    #file_handler = open( file_path, 'r' )
+    #print file_handler.read()
+    #file_handler.close()
+    return
+
+def Number_2( file_directory, date_file_name, photo_file_base ):
+    '''
+    Select a plotting program of your choice (for example xmgrace, gnuplot,
+    ROOT, Matlab), 
+    * read in the ASCII file you have generated and 
+    * plot the 2nd and the 3rd column vs. the 1st column. 
+    * Plot both curves into the same figure. 
+    * Generate a pdf, an eps and a jpeg file of the figure with
+    proper axis annotations [4 points].
+    '''
+    # create data array from the ASCII file
+    array_from_file = numpy.genfromtxt( file_directory + date_file_name ).transpose()
+    # plot array with `matplotlib.pyplot`
+    figure = matplotlib.pyplot.figure( figsize = ( 11.0, 8.5 ) )
+    axes = figure.add_axes( [0.1, 0.2, 0.8, 0.7] )
+    axes.grid( True )
+    plot1 = axes.plot( array_from_file[0], array_from_file[1], "r-", lw = 2 )
+    plot2 = axes.plot( array_from_file[0], array_from_file[2], "b-", lw = 2 )
+    axes.set_title( "Trigonometric functions: $\\sin$ and $\\sin(x)/x$" )
+    axes.set_xlabel( "$x$" )
+    figure.legend( ( plot1, plot2 ), ( "$\\sin(x)$", "$\\sin(x)/x$" ), 'lower center' )
+    # save files
+    for file_type in ["pdf", "eps", "png"]:
+        figure.savefig( file_directory + photo_file_base + "." + file_type )
+    matplotlib.pyplot.show()
+    return
+    
+    '''
+    matplotlib.pyplot.plot(array_from_file[0],array_from_file[1],'-r', array_from_file[0],array_from_file[2],'-b' )
+    # save to PDF
+    pdf_handler = matplotlib.backends.backend_pdf.PdfPages(file_directory + file_base + ".pdf")
+    plt.savefig(pdf_handler, format='pdf')
+    # TODO: save to EPS
+    # TODO: save to jpg
+    '''
+
+if __name__ == '__main__':
+    # Launch the script!
+    directory = "/tmp/"
+    date_file_name = "Number_1_part_b_output.txt"
+    photo_file_base = "Number_2_output"
+    # Number 1, part a
+    Number_1_part_a()
+    # Number 1, part b
+    Number_1_part_b( -10, 10, 0.05, directory, date_file_name )
+    # Number 2
+    Number_2( directory, date_file_name, photo_file_base )
+
+
+
+    
+    
+    
