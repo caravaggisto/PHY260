@@ -22,61 +22,30 @@ other notes:
     rasterized: False
 '''
 
-from file_manager import local_data_directory, get_newest_file_by_type_in_dir, \
-    filepath_for_now
-import numpy as np
+from Random_Walks import Random_Walks
+from hw6_part1 import filepath_for_now, local_data_directory, \
+    get_newest_file_by_type_in_dir, figs_directory
 import pickle
 
-class Random_Walks( object ):
-    ''' Generates Np random walks of length Ns.
-    Compute...
-        <x> with get_x_mean
-        <x^2> with get_x2_mean
-    Methods to compute <x>, <x^2> are get_x_mean, get
-    '''
-    def __init__( self, Np, Ns ):
-        self.ns_values = np.arange( 1, Ns + 1 ) # 'Ns+1' because I want Ns *included* in the array.
-        self.Np, self.Ns = Np, Ns
-    def make_walks( self ):
-        ''' computes and returns Np random walks with Ns steps each, organized thus:
-            walks[p,s,i] = the ith coordinate *change* (-1,0, or 1) of the sth step for,j,i  the pth particle.
-        e.g.
-            walks[:,0:n,0] = the x-coord *changes* of all particles up to and including the nth step.
-            walks[p,:,0].sum() = the final (after all steps) x-coord of the pth particle.
-        '''
-        Np, Ns = self.Np, self.Ns
-        directions = {1:( 1, 0 ), 2:( 0, 1 ), 3:( -1, 0 ), 4:( 0, -1 )}
-        random_ints = np.random.randint( 1, 5, Np * Ns )
-        self.walks = np.zeros( ( Np * Ns, 2 ), dtype = int )
-        for key, value in directions.iteritems():
-            self.walks[random_ints == key] = value
-        # resize is permanent; reshape is not.
-        self.walks.resize( Np, Ns, 2 )
-        return self.walks
-    def get_x_mean( self ):
-        ''' computes and returns <x> '''
-        n_values, walks = self.ns_values, self.walks
-        self.x_means = np.asarray( [walks[:, 0:n, 0].mean() for n in n_values] )
-        return self.x_means
-    def get_x2_mean( self ):
-        ''' computes and returns <x^2> '''
-        n_values, walks = self.ns_values, self.walks
-        self.x2_means = np.asarray( [np.square( walks[:, 0:n, 0] ).mean() for n in n_values] )
-        return self.x2_means
-
-if __name__ == '__main__':
+def make_walks():
     #===============================================================================
     # Adjustable parameters for the problem 
-    #TODO: make these 10000 and 100, respectively.
-    Np = 100
-    Ns = 10
+    Np = 10000
+    Ns = 100
     #===============================================================================
     random_walks = Random_Walks( Np, Ns )
     random_walks.make_walks()
-    random_walks.get_x_mean()
-    random_walks.get_x2_mean()
-    pickle.dump( random_walks, open( filepath_for_now( local_data_directory ) + '.p' , "wb" ) )
+    random_walks.get_x_means()
+    random_walks.get_x2_means()
+    random_walks.get_r2_mean()
+    fp = filepath_for_now( local_data_directory )
+    print "Save to "
+    print fp
+    pickle.dump( random_walks, open( fp + '.p' , "wb" ) )
 
-newest_pickle_file = get_newest_file_by_type_in_dir( '.p' , local_data_directory )
-newest_data_object = pickle.load( open( newest_pickle_file, "rb" ) )
-#data_path = data_filename_root + '_' + time_string + '.p'
+if __name__ == '__main__':
+    make_walks()
+
+path_to_newest_pickle = get_newest_file_by_type_in_dir( '.p', 'data' )
+path_for_new_fig_for_newest_pickle = figs_directory + '/' + path_to_newest_pickle.split( '/' )[-1][:-2]
+
