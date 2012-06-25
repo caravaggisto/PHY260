@@ -4,6 +4,7 @@ Created on Apr 22, 2012
 @author: willg
 '''
 import numpy as np
+import matplotlib.pyplot as plt
 
 # For debugging, to use same random set.
 #np.random.seed( 1 )
@@ -47,36 +48,19 @@ class Diffusion( object ):
     '''
     TODO: make methods that compute metadata, stored locally
     '''
-    def get_x_mean( self ):
+    def get_x_means( self ):
         ''' computes and returns <x> '''
         # note, expect dimensions to be (T,1)
         self.x_means = self.u.mean( axis = 0 )
     
-    def get_x2_mean( self ):
+    def get_x2_means( self ):
         ''' computes and returns <x^2> '''
         self.x2_means = ( self.u ** 2 ).mean( axis = 0 )
 
-if __name__ == '__main__':
-    '''this code is for debugging the class, making sure 
-    the methods are all working the way they're supposed to, etc. '''
-    np.random.seed( 1 ) # use the same set of random numbers... forever!
-    #===========================================================================
-    X = 100 # number of 1D sites
-    T = 1000 # number of time steps
-    dx = 1
-    dt = 0.1
-    D = 2
-    #=== run the model =======================================================================
-    d1 = Diffusion( X, T, dx, dt, D )
-    d1.solve()
-    d1.get_x_mean()
-    d1.get_x2_mean()
+def plot_x_moments( d1 ):
     data = {'<x>': d1.x_means,
             '<x^2>':d1.x2_means}
-    #=== plot the results ========================================================================
-    import matplotlib.pyplot as plt
     #=== Plot <x>, <x^2> vs. t ========================================================================
-    '''
     fig = plt.figure()
     for n, y in enumerate( data ):
         ax = fig.add_subplot( 2, 1, n + 1 )
@@ -85,8 +69,9 @@ if __name__ == '__main__':
                     c = 'r' )
     ax.set_xlim( 0, d1.T )
     #    ax.set_ylim( -max( -ax.axis()[2], ax.axis()[3] ), max( -ax.axis()[2], ax.axis()[3] ) )
-    plt.show()
-    '''
+    fig.savefig( 'figs/moments.png' )
+
+def plot_several_times( d1 ):
     #=== Plot x positions with a few times diffusion========================================================================
     fig = plt.figure( figsize = ( 8.5, 11 ) )
     ax = fig.add_subplot( 1, 1, 1 )
@@ -105,4 +90,58 @@ if __name__ == '__main__':
 #    ax.set_xlim( 0, d1.X )
     # make axes symmetrical:
 #    ax.set_ylim( -max( -ax.axis()[2], ax.axis()[3] ), max( -ax.axis()[2], ax.axis()[3] ) )
-    fig.savefig( 'figs/Diffusion_withoutcurves.pdf' )
+    fig.savefig( 'figs/Diffusion_withoutcurves.png' )
+
+def plot_with_gaussians( d1 ):
+    ''' plot a few time-points of the diffusion and
+    compare those points with an overlaid normal
+    distribution with
+        mu = X / 2
+        sigma = (2*D*t)**0.5
+    '''
+    fig = plt.figure( figsize = ( 8.5, 11 ) )
+    ax = fig.add_subplot( 1, 1, 1 )
+#    for t in np.array( range( 20 ) ) ** 2:
+    for t in np.linspace( 0, 9, num = 5 ) ** 2:
+        # plot the analytical:
+        ax.plot( range( d1.X ),
+                 lambda t: np.random.normal( loc = d1.X * 0.5, scale = ( 2 * d1.D * t ) ** 0.5 )
+                )
+        ax.scatter( range( d1.X ),
+                 d1.u[:, t],
+                 label = 't=%d' % t
+                 )
+    ax.set_ylim( ax.axis()[2] , ax.axis()[3] * 1.2 )
+    ax.set_xlabel( 'X from 0 to % d' % d1.X )
+    ax.set_ylabel( 'u( x, t )' )
+    plt.legend()
+    fig.suptitle( 'PHY260 Homework #6, Part 2: \nApproximation of the Diffusion Equation\ndt = %2.1f, dx = %2.1f, T from 0 to %d' % ( d1.dx, d1.dt, d1.T ) ,
+                  ha = 'center', size = 'large' )
+#    ax.set_xlim( 0, d1.X )
+    # make axes symmetrical:
+#    ax.set_ylim( -max( -ax.axis()[2], ax.axis()[3] ), max( -ax.axis()[2], ax.axis()[3] ) )
+    fig.savefig( 'figs/Diffusion_withcurves.pdf' )
+
+
+if __name__ == '__main__':
+    '''this code is for debugging the class, making sure 
+    the methods are all working the way they're supposed to, etc. '''
+    np.random.seed( 1 ) # use the same set of random numbers... forever!
+    #===========================================================================
+    X = 100 # number of 1D sites
+    T = 1000 # number of time steps
+    dx = 1
+    dt = 0.1
+    D = 2
+    #=== run the model =======================================================================
+    d1 = Diffusion( X, T, dx, dt, D )
+    d1.solve()
+    d1.get_x_means()
+    d1.get_x2_means()
+    
+    #=== plot the results ========================================================================
+#    plot_several_times( d1 )
+#    plot_x_moments( d1 )
+    plot_with_gaussians( d1 )
+    
+    
