@@ -1,0 +1,16 @@
+Notes:
+Equation for radioactive decay:
+    dN/dt = - (1 / tau) * N
+Approximation:
+    dN/dt = lim (del_t -> 0) [ ( N(t + del_t) - N(t) ) / del_t ]
+    ~= N(t + del_t) - N(t) ) / del_t
+then
+    N(t + del_t) = N(t) + (dN/dt) * del_t
+    N(t + del_t) = N(t) + ( -N(t) / tau ) * del_t
+    N(t + del_t) = N(t) * ( 1 - del_t / tau )
+And then you can obtain a solution by consecutive iteration.
+    N(i+1) = N(i) * ( 1 - del_t / tau )
+Or, use a Taylor approximation:
+    f(x) = Sum( [ f^(i)(a) * (x-a)^i ] / i! )
+which for this case is, to second degree,
+    N(i) ~= N(0) + dN/dt(0) * i * del_t + d^2N/dt^2(0) * del_t^2 / 2
